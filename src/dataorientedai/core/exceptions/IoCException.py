@@ -1,0 +1,2 @@
+class IoCException(Exception):
+    pass

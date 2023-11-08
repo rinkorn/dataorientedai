@@ -1,0 +1,33 @@
+# py files
+*__pycache__/*
+*.pyc
+
+# env configuraion
+env/
+venv/
+.env/
+.venv/
+
+# VSCode
+.vscode/
+
+# Pycharm
+.idea/
+
+# file with private variables
+.env
+
+# source distr
+dist/
+
+# caches
+.ruff_cache/
+
+# models
+models/
+
+# mlruns
+mlruns/
+
+# pytest
+.coverage

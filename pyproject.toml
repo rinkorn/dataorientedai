@@ -1,0 +1,80 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "dataoriented-ai"
+authors = [{name = "Albert M", email = "rinkorn@mail.ru"}]
+license = {file = "LICENSE"}
+classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
+dynamic = ["version", "description"]
+dependencies = [
+    "numpy",
+    "matplotlib",
+    "idx2numpy",
+    "albumentations",
+    "opencv-python-headless",
+    "torch",
+    "torchvision",
+    "torchmetrics",
+    "torchsummary",
+    "lightning",
+    "segmentation_models_pytorch",
+    "onnx",
+    "typing_extensions",
+    "rich",
+    "mlflow",
+    "click",
+    "dvc[s3]",
+]
+
+[project.optional-dependencies]
+dev = [
+    "flit",
+    "pip-tools",
+    "pre-commit",
+    "wheel",
+    "ipykernel",
+    "ipywidgets",
+    "black",
+    "ruff",
+    "mypy",
+]
+test = ["pytest", "pytest-cov", "mock"]
+doc = ["sphinx"]
+
+[project.scripts]
+segmnist-train = "dataorientedai.train_litmodel:main"
+segmnist-predict = "dataorientedai.predict_litmodel:main"
+
+[project.urls]
+Documentation = "https://gitlab.com/dlspace/dataorientedai/docs"
+Source = "https://gitlab.com/dlspace/dataorientedai"
+
+[tool.flit.module]
+name = "dataorientedai"
+
+[tool.flit.sdist]
+include = ["docs/"]
+exclude = ["docs/*.html"]
+
+[tool.ruff]
+line-length = 88 # defaults to 88 like black
+target-version = "py310" # the python version to target, useful when considering code upgrades, defaults to "py310"
+select = [
+    "E",  # pycodestyle
+    "F",  # pyflakes
+    "UP", # pyupgrade,
+    "I",  # isort
+]
+ignore = [
+    "F401", # unused imports
+    "F841", # unused variable
+]
+
+[tool.pytest.ini_options]
+# addopts = "--cov --cov-report html --cov-report term-missing --cov-fail-under 75"
+# addopts = "--cov --cov-report term-missing --cov-fail-under 50"
+
+[tool.coverage.run]
+source = ["src"]
