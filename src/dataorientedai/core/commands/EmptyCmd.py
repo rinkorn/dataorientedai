@@ -1,4 +1,4 @@
-from dataorientedai.core import ICommand
+from dataorientedai.core.interfaces.ICommand import ICommand
 
 
 class EmptyCmd(ICommand):

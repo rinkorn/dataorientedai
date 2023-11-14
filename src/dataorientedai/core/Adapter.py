@@ -9,12 +9,12 @@ class Adapter(IAdapter):
     """Реализован генератор адаптеров"""
 
     @staticmethod
-    def generate(IClass: object):
-        class_name = IClass.__name__
-        class_space = inspect.getmodule(IClass).__dict__
-        class_module = IClass.__module__
+    def generate(InterfaceClass: object):
+        class_name = InterfaceClass.__name__
+        class_space = inspect.getmodule(InterfaceClass).__dict__
+        class_module = InterfaceClass.__module__
         class_attrs_names = [
-            m[0] for m in inspect.getmembers(IClass, inspect.isfunction)
+            m[0] for m in inspect.getmembers(InterfaceClass, inspect.isfunction)
         ]
 
         if class_name[:9] == "Interface" and class_name[9].isupper():
@@ -36,7 +36,7 @@ class Adapter(IAdapter):
                 class_definition += (
                     f"    def {attr_name}(self):\n"
                     f"        return {IoC.__name__}.resolve(\n"
-                    f'            "{class_module}.{class_name}:{attr_name[4:]}.get",\n'
+                    f'            "Interfaces.{class_name}:{attr_name[4:]}.get",\n'
                     "            self.o,\n"
                     "        )\n"
                     "\n"
@@ -45,7 +45,7 @@ class Adapter(IAdapter):
                 class_definition += (
                     f"    def {attr_name}(self, value):\n"
                     f"        return {IoC.__name__}.resolve(\n"
-                    f'            "{class_module}.{class_name}:{attr_name[4:]}.set",\n'
+                    f'            "Interfaces.{class_name}:{attr_name[4:]}.set",\n'
                     "            self.o,\n"
                     "            value,\n"
                     "        )"
@@ -54,25 +54,26 @@ class Adapter(IAdapter):
             else:
                 # Необязательная задача на подумать:
                 # если интерфейсе потребуются какие-либо иные методы
+                # f'            "{class_module}.{class_name}:{attr_name}",\n'
                 class_definition += (
                     f"    def {attr_name}(self, *args):\n"
                     "        return IoC.resolve(\n"
-                    f'            "{class_module}.{class_name}:{attr_name}",\n'
+                    f'            "Interfaces.{class_name}:{attr_name}",\n'
                     "            *args,\n"
                     "        )\n"
                     "\n"
                 )
-        # class_space = inspect.getmodule(IClass).__dict__
-        # exec(class_definition, class_space)
-        # Adapter = type(
-        #     adapter_class_name,
-        #     (IClass,),
-        #     class_space[adapter_class_name].__dict__.copy(),
-        # )
-        # return Adapter
-        print(class_definition)
-        exec(class_definition)
-        return locals()[adapter_class_name]
+        # class_space = inspect.getmodule(InterfaceClass).__dict__
+        exec(class_definition, class_space)
+        AdaptedClass = type(
+            adapter_class_name,
+            (InterfaceClass,),
+            class_space[adapter_class_name].__dict__.copy(),
+        )
+        return AdaptedClass
+        # print(class_definition)
+        # exec(class_definition)
+        # return locals()[adapter_class_name]
 
 
 # # %%

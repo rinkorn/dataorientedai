@@ -24,10 +24,10 @@ class MnistUbyteToNumpyConvertableAdapter(abc.ABC):
         self.o = o
 
     def get_path_in(self):
-        return self.o.__getitem__["path_in"]
+        return self.o.__getitem__("path_in")
 
     def get_file_out(self):
-        return self.o.__getitem__["file_out"]
+        return self.o.__getitem__("file_out")
 
 
 class MnistUbyteToNumpyConvertCmd(ICommand):
@@ -63,12 +63,18 @@ class MnistUbyteToNumpyConvertCmd(ICommand):
         )
 
 
+class InitMnistUbyteToNumpyConvertableObjectCmd(ICommand):
+    def __init__(self, o: IUObject):
+        self.o = o
+
+    def execute(self):
+        path = Path("/home/rinkorn/space/prog/python/free/project-dataorientedai")
+        self.o.__setitem__("path_in", path / "data/processed/mnist-ubyte/")
+        self.o.__setitem__("file_out", path / "data/processed/mnist-numpy/mnist.npz")
+
+
 if __name__ == "__main__":
-    path = Path("/home/rinkorn/space/prog/python/free/project-dataorientedai")
-
-    uobj = UObject()
-    uobj.__setitem__("path_in", path / "data/processed/mnist-ubyte/")
-    uobj.__setitem__("file_out", path / "data/processed/mnist-numpy/mnist.npz")
-
-    convertable_obj = MnistUbyteToNumpyConvertableAdapter(uobj)
+    obj = UObject()
+    InitMnistUbyteToNumpyConvertableObjectCmd(obj).execute()
+    convertable_obj = MnistUbyteToNumpyConvertableAdapter(obj)
     MnistUbyteToNumpyConvertCmd(convertable_obj).execute()

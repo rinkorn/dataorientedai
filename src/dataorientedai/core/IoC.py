@@ -1,6 +1,5 @@
 import abc
 
-from dataorientedai.core._Scope import _Scope
 from dataorientedai.core.ConcurrentDictionary import (
     ConcurrentDictionary,
     NotThreadSafeDictionary,
@@ -11,7 +10,9 @@ from dataorientedai.core.interfaces.IIoC import IIoC
 from dataorientedai.core.interfaces.IScope import IScope
 from dataorientedai.core.interfaces.IStrategy import IStrategy
 from dataorientedai.core.LeafScope import LeafScope
+from dataorientedai.core.Scope import Scope
 from dataorientedai.core.ThreadLocal import ThreadLocal
+from dataorientedai.core.UObject import UObject
 
 
 # %%
@@ -50,11 +51,11 @@ class IoC(IIoC):
 
 # %%
 class ScopeBasedResolveDependencyStrategy(IStrategy):
-    _root: _Scope = None
+    _root: Scope = None
     _current_scopes = ThreadLocal()
 
     @staticmethod
-    def _default_scope(*args):
+    def _default_scope():
         return ScopeBasedResolveDependencyStrategy._root
 
     @staticmethod
@@ -144,7 +145,7 @@ class InitScopeBasedIoCImplementationCmd(ICommand):
         # scopes.new - команда, которая создаёт storage когда это необходимо
         dependencies.__setitem__(
             "scopes.new",
-            lambda *args: _Scope(
+            lambda *args: Scope(
                 IoC.resolve("scopes.storage"),
                 args[0],
             ),
@@ -155,7 +156,7 @@ class InitScopeBasedIoCImplementationCmd(ICommand):
         default_scope = ScopeBasedResolveDependencyStrategy._default_scope
         dependencies.__setitem__(
             "scopes.current",
-            lambda *args: current_scope if current_scope is not None else default_scope,
+            current_scope if current_scope is not None else default_scope,
         )
 
         # scopes.current - устанвоить scope в текущем потоке
@@ -174,7 +175,7 @@ class InitScopeBasedIoCImplementationCmd(ICommand):
             lambda *args: _UnregisterIoCDependencyCmd(args[0]),
         )
 
-        root_scope = _Scope(
+        root_scope = Scope(
             dependencies,
             LeafScope(IoC.resolve("IoC.default_strategy")),
             # parent=None,
@@ -214,4 +215,10 @@ if __name__ == "__main__":
     IoC.resolve(
         "IoC.unregister",
         "a",
+    ).execute()
+
+    IoC.resolve(
+        "IoC.register",
+        "UObject",
+        lambda *args: UObject(),
     ).execute()

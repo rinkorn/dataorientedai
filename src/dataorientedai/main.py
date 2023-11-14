@@ -1,67 +1,180 @@
 from pathlib import Path
+from queue import Queue
 
-import dataorientedai.ai._predict_model as pm
-import dataorientedai.ai._train_litmodel as tm
 from dataorientedai.ai.data.MnistNumpyToImageConvertable import (
+    InitMnistNumpyToImageConvertableObjectCmd,
     MnistNumpyToImageConvertableAdapter,
     MnistNumpyToImageConvertCmd,
 )
 from dataorientedai.ai.data.MnistUbyteToNumpyConvertable import (
+    InitMnistUbyteToNumpyConvertableObjectCmd,
     MnistUbyteToNumpyConvertableAdapter,
     MnistUbyteToNumpyConvertCmd,
 )
 from dataorientedai.ai.data.Unzippable import (
-    InitUnzippableObject,
+    InitUnzippableObjectCmd,
     UnzipCmd,
     UnzippableAdapter,
 )
+from dataorientedai.ai.Predictable import (
+    InitPredictableObjectCmd,
+    PredictableAdapter,
+    PredictCmd,
+)
+from dataorientedai.ai.Trainable import (
+    InitTrainableObjectCmd,
+    TrainableAdapter,
+    TrainCmd,
+)
+from dataorientedai.core.commands.DoubleRepeateCmd import DoubleRepeateCmd
+from dataorientedai.core.commands.EmptyCmd import EmptyCmd
+from dataorientedai.core.commands.HardStopCmd import HardStopCmd
+from dataorientedai.core.commands.LogPrintCmd import LogPrintCmd
+from dataorientedai.core.commands.RepeateCmd import RepeateCmd
+from dataorientedai.core.ContextDictionary import ContextDictionary
+from dataorientedai.core.Dictionary import Dictionary
+from dataorientedai.core.exceptions.BaseAppException import BaseAppException
+from dataorientedai.core.handlers.ExceptionHandler import ExceptionHandler
+from dataorientedai.core.IoC import InitScopeBasedIoCImplementationCmd, IoC
+from dataorientedai.core.Processor import (
+    InitProcessorContextCmd,
+    Processable,
+    Processor,
+)
 from dataorientedai.core.UObject import UObject
 
+# # %% First iteration
+# if __name__ == "__main__":
+#     obj = UObject()
+#     cmd = InitUnzippableObjectCmd(obj)
+#     cmd.execute()
+#     cmd = UnzipCmd(UnzippableAdapter(obj))
+#     cmd.execute()
+
+#     obj = UObject()
+#     cmd = InitMnistUbyteToNumpyConvertableObjecCmdt(obj)
+#     cmd.execute()
+#     convertable_obj = MnistUbyteToNumpyConvertableAdapter(obj)
+#     cmd = MnistUbyteToNumpyConvertCmd(convertable_obj)
+#     cmd.execute()
+
+#     obj = UObject()
+#     cmd = InitMnistNumpyToImageConvertableObjectCmd(obj)
+#     cmd.execute()
+#     cmd = MnistNumpyToImageConvertCmd(MnistNumpyToImageConvertableAdapter(obj))
+#     cmd.execute()
+
+#     obj = UObject()
+#     cmd = InitTrainableObjectCmd(obj)
+#     cmd.execute()
+#     cmd = TrainCmd(TrainableAdapter(obj))
+#     cmd.execute()
+
+#     obj = UObject()
+#     cmd = InitPredictableObjectCmd(obj)
+#     cmd.execute()
+#     cmd = PredictCmd(PredictableAdapter(obj))
+#     cmd.execute()
+
+
+# # %% Second Iteration
+# if __name__ == "__main__":
+#     queue = Queue()
+#     handler = ExceptionHandler()
+#     handler.setup(
+#         UnzipCmd,
+#         BaseAppException,
+#         lambda cmd, exc: queue.put(LogPrintCmd(cmd, exc)),
+#     )
+#     handler.setup(
+#         MnistUbyteToNumpyConvertCmd,
+#         BaseAppException,
+#         lambda cmd, exc: queue.put(LogPrintCmd(cmd, exc)),
+#     )
+#     handler.setup(
+#         MnistNumpyToImageConvertCmd,
+#         BaseAppException,
+#         lambda cmd, exc: queue.put(LogPrintCmd(cmd, exc)),
+#     )
+#     handler.setup(
+#         TrainCmd,
+#         BaseAppException,
+#         lambda cmd, exc: queue.put(LogPrintCmd(cmd, exc)),
+#     )
+#     handler.setup(
+#         PredictCmd,
+#         BaseAppException,
+#         lambda cmd, exc: queue.put(LogPrintCmd(cmd, exc)),
+#     )
+#     handler.setup(
+#         RepeateCmd,
+#         BaseAppException,
+#         lambda cmd, exc: queue.put(LogPrintCmd(cmd, exc)),
+#     )
+
+#     obj = UObject()
+#     queue.put(InitUnzippableObjectCmd(obj))
+#     queue.put(UnzipCmd(UnzippableAdapter(obj)))
+
+#     obj = UObject()
+#     queue.put(InitMnistUbyteToNumpyConvertableObjectCmd(obj))
+#     queue.put(MnistUbyteToNumpyConvertCmd(MnistUbyteToNumpyConvertableAdapter(obj)))
+
+#     obj = UObject()
+#     queue.put(InitMnistNumpyToImageConvertableObjectCmd(obj))
+#     queue.put(MnistNumpyToImageConvertCmd(MnistNumpyToImageConvertableAdapter(obj)))
+
+#     obj = UObject()
+#     queue.put(InitTrainableObjectCmd(obj))
+#     queue.put(TrainCmd(TrainableAdapter(obj)))
+
+#     obj = UObject()
+#     queue.put(InitPredictableObjectCmd(obj))
+#     queue.put(PredictCmd(PredictableAdapter(obj)))
+
+#     while True and not queue.empty():
+#         cmd = queue.get()
+#         try:
+#             cmd.execute()
+#         except Exception as e:
+#             exc = type(e)
+#             handler.handle(cmd, exc)
+#             # IoC.resolve("ExceptionHandler", cmd, exc).execute()
+
+
+# %% Third Iteration
 if __name__ == "__main__":
-    root = Path("/home/rinkorn/space/prog/python/free/project-dataorientedai/")
+    InitScopeBasedIoCImplementationCmd().execute()
+    scope = IoC.resolve("scopes.new", IoC.resolve("scopes.root"))
+    IoC.resolve("scopes.current.set", scope).execute()
+
+    processor_context = Dictionary()
+    InitProcessorContextCmd(processor_context).execute()
+    queue = processor_context["queue"]
 
     obj = UObject()
-    InitUnzippableObject(obj).execute()
-    UnzipCmd(UnzippableAdapter(obj)).execute()
+    queue.put(InitUnzippableObjectCmd(obj))
+    queue.put(UnzipCmd(UnzippableAdapter(obj)))
 
-    uobj = UObject()
-    uobj.set_property("path_in", root / "data/processed/mnist-ubyte/")
-    uobj.set_property("file_out", root / "data/processed/mnist-numpy/mnist.npz")
-    convertable_obj = MnistUbyteToNumpyConvertableAdapter(uobj)
-    MnistUbyteToNumpyConvertCmd(convertable_obj).execute()
+    obj = UObject()
+    queue.put(InitMnistUbyteToNumpyConvertableObjectCmd(obj))
+    queue.put(MnistUbyteToNumpyConvertCmd(MnistUbyteToNumpyConvertableAdapter(obj)))
 
-    uobj = UObject()
-    uobj.set_property("file_in", root / "data/processed/mnist-numpy/mnist.npz")
-    uobj.set_property("path_out", root / "data/processed/mnist-images/")
-    convertable_obj = MnistNumpyToImageConvertableAdapter(uobj)
-    MnistNumpyToImageConvertCmd(convertable_obj).execute()
+    obj = UObject()
+    queue.put(InitMnistNumpyToImageConvertableObjectCmd(obj))
+    queue.put(MnistNumpyToImageConvertCmd(MnistNumpyToImageConvertableAdapter(obj)))
 
+    obj = UObject()
+    queue.put(InitTrainableObjectCmd(obj))
+    queue.put(TrainCmd(TrainableAdapter(obj)))
 
-if __name__ == "__main__":
-    from dataorientedai.ai.run_training import run_training
+    obj = UObject()
+    queue.put(InitPredictableObjectCmd(obj))
+    queue.put(PredictCmd(PredictableAdapter(obj)))
 
-    kwargs = {}
-    kwargs["epochs"] = 100
-    kwargs["device"] = "cuda:0"
-    kwargs["root"] = Path(
-        "/home/rinkorn/space/prog/python/free/project-dataorientedai/"
-    )
-    kwargs["mean"] = 0.13092535192648502
-    kwargs["std"] = 0.3084485240270358
-    run_training(kwargs)
-
-if __name__ == "__main__":
-    from dataorientedai.ai.run_prediction import run_prediction
-
-    kwargs = {}
-    kwargs["device"] = "cuda:0"
-    kwargs["root"] = Path(
-        "/home/rinkorn/space/prog/python/free/project-dataorientedai/"
-    )
-    kwargs["mean"] = 0.13092535192648502
-    kwargs["std"] = 0.3084485240270358
-    kwargs["path_model_state_dict"] = kwargs["root"] / "models/model_state_dict.pth"
-    kwargs["path_img_in"] = kwargs["root"] / "data/processed/mnist-images/x_train/"
-    kwargs["path_img_in"] = kwargs["path_img_in"] / "00000.png"
-    kwargs["path_img_out"] = kwargs["root"] / "00000_out.png"
-    run_prediction(kwargs)
+    queue.put(HardStopCmd(processor_context))
+    # action
+    processor = Processor(Processable(processor_context))
+    # processor.wait()
+    # # assert
+    # assert queue.qsize() == 1

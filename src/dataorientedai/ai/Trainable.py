@@ -18,6 +18,7 @@ from dataorientedai.core.BlockingCollection import BlockingCollection
 from dataorientedai.core.interfaces.ICommand import ICommand
 from dataorientedai.core.interfaces.IDictionary import IDictionary
 from dataorientedai.core.interfaces.IUObject import IUObject
+from dataorientedai.core.IoC import InitScopeBasedIoCImplementationCmd, IoC
 from dataorientedai.core.UObject import UObject
 
 # %%
@@ -109,25 +110,30 @@ class ITrainable(abc.ABC):
         self.o = o
 
     @abc.abstractmethod
-    @abc.abstractmethod
     def get_model(self):
         pass
 
+    @abc.abstractmethod
     def set_model(self, model):
         pass
 
+    @abc.abstractmethod
     def get_device(self):
         pass
 
+    @abc.abstractmethod
     def get_epochs(self):
         pass
 
+    @abc.abstractmethod
     def get_loss_fn(self):
         pass
 
+    @abc.abstractmethod
     def get_optimizer(self):
         pass
 
+    @abc.abstractmethod
     def get_train_dataloader(self):
         pass
 
@@ -157,6 +163,9 @@ class TrainableAdapter(ITrainable):
     def get_train_dataloader(self):
         return self.o.__getitem__("train_dataloader")
 
+    def get_root(self):
+        return self.o.__getitem__("root")
+
 
 class TrainCmd(ICommand):
     def __init__(self, o: TrainableAdapter):
@@ -169,6 +178,7 @@ class TrainCmd(ICommand):
         loss_fn = self.o.get_loss_fn()
         optimizer = self.o.get_optimizer()
         train_dataloader = self.o.get_train_dataloader()
+        root = self.o.get_root()
 
         global_step = 0
         global_history = defaultdict(list)
@@ -205,8 +215,10 @@ class TrainCmd(ICommand):
                         cmap="jet",
                     )
                 if global_step % 100 == 0:
-                    torch.save(model, "./model_full.pt")
-                    torch.save(model.state_dict(), "./model_state_dict.pth")
+                    torch.save(model, str(root / "models/model_full.pt"))
+                    torch.save(
+                        model.state_dict(), str(root / "models/model_state_dict.pth")
+                    )
                 global_step += 1
 
             epoch += 1
@@ -214,7 +226,7 @@ class TrainCmd(ICommand):
                 stop = True
 
 
-class InitTrainableObject(ICommand):
+class InitTrainableObjectCmd(ICommand):
     def __init__(self, o: IUObject):
         self.o = o
 
@@ -285,7 +297,29 @@ class InitTrainableObject(ICommand):
         )
 
 
+class RegisterTrainableObjectCmd(ICommand):
+    def execute(self):
+        obj = UObject()
+        IoC.resolve(
+            "IoC.register",
+            "Objects.trainable_object_1",
+            lambda *args: obj,
+        ).execute()
+
+
+# if __name__ == "__main__":
+#     obj = UObject()
+#     InitTrainableObject(obj).execute()
+#     TrainCmd(TrainableAdapter(obj)).execute()
+
 if __name__ == "__main__":
-    obj = UObject()
-    InitTrainableObject(obj).execute()
-    TrainCmd(TrainableAdapter(obj)).execute()
+    InitScopeBasedIoCImplementationCmd().execute()
+    scope = IoC.resolve("scopes.new", IoC.resolve("scopes.root"))
+    IoC.resolve(
+        "scopes.current.set",
+        scope,
+    ).execute()
+
+    RegisterTrainableObjectCmd().execute()
+    InitTrainableObjectCmd(IoC.resolve("Objects.trainable_object_1")).execute()
+    TrainCmd(TrainableAdapter(IoC.resolve("Objects.trainable_object_1"))).execute()

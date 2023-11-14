@@ -37,6 +37,7 @@ class MnistNumpyToImageConvertCmd(ICommand):
     def execute(self):
         file_in = Path(self.o.get_file_in())
         path_out = Path(self.o.get_path_out())
+
         if not file_in.exists():
             raise FileExistsError()
         if not path_out.exists():
@@ -73,12 +74,19 @@ class MnistNumpyToImageConvertCmd(ICommand):
         loop_saving(paths, "x_test", "y_test")
 
 
+class InitMnistNumpyToImageConvertableObjectCmd(ICommand):
+    def __init__(self, o: IUObject):
+        self.o = o
+
+    def execute(self):
+        path = Path("/home/rinkorn/space/prog/python/free/project-dataorientedai")
+        self.o.__setitem__("file_in", path / "data/processed/mnist-numpy/mnist.npz")
+        self.o.__setitem__("path_out", path / "data/processed/mnist-images/")
+
+
 if __name__ == "__main__":
-    path = Path("/home/rinkorn/space/prog/python/free/project-dataorientedai")
-
-    uobj = UObject()
-    uobj.__setitem__("file_in", path / "data/processed/mnist-numpy/mnist.npz")
-    uobj.__setitem__("path_out", path / "data/processed/mnist-images/")
-
-    convertable_obj = MnistNumpyToImageConvertableAdapter(uobj)
-    MnistNumpyToImageConvertCmd(convertable_obj).execute()
+    obj = UObject()
+    InitMnistNumpyToImageConvertableObjectCmd(obj).execute()
+    convertable_obj = MnistNumpyToImageConvertableAdapter(obj)
+    cmd = MnistNumpyToImageConvertCmd(convertable_obj)
+    cmd.execute()

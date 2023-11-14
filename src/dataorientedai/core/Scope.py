@@ -2,7 +2,7 @@ from dataorientedai.core.interfaces.IDictionary import IDictionary
 from dataorientedai.core.interfaces.IScope import IScope
 
 
-class _Scope(IScope):
+class Scope(IScope):
     """
     dependencies - словарик, где в виде ключа - зависимость, а в виде значения -
     стратегия (по входным параметрам возвратит ссылку на нужный объект)
