@@ -204,21 +204,21 @@ class TrainCmd(ICommand):
                         f"global_step: {global_step:06d}, "
                         f"train_loss: {loss_value:.6f}"
                     )
-                if global_step % 100 == 0:
-                    img = image[0, ...].unsqueeze(0)
-                    msk = mask[0, ...].unsqueeze(0).unsqueeze(0)
-                    mask_argmax = pred[0, ...].argmax(0).unsqueeze(0).unsqueeze(0)
-                    fig, ax = plot_sample(
-                        msk,
-                        mask_argmax,
-                        clim=(0.0, 10.0),
-                        cmap="jet",
-                    )
-                if global_step % 100 == 0:
-                    torch.save(model, str(root / "models/model_full.pt"))
-                    torch.save(
-                        model.state_dict(), str(root / "models/model_state_dict.pth")
-                    )
+                # if global_step % 100 == 0:
+                #     img = image[0, ...].unsqueeze(0)
+                #     msk = mask[0, ...].unsqueeze(0).unsqueeze(0)
+                #     mask_argmax = pred[0, ...].argmax(0).unsqueeze(0).unsqueeze(0)
+                #     fig, ax = plot_sample(
+                #         msk,
+                #         mask_argmax,
+                #         clim=(0.0, 10.0),
+                #         cmap="jet",
+                #     )
+                # if global_step % 100 == 0:
+                #     torch.save(model, str(root / "models/model_full.pt"))
+                #     torch.save(
+                #         model.state_dict(), str(root / "models/model_state_dict.pth")
+                #     )
                 global_step += 1
 
             epoch += 1

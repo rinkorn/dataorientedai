@@ -28,7 +28,7 @@ from dataorientedai.ai.Trainable import (
 )
 from dataorientedai.core.commands.DoubleRepeateCmd import DoubleRepeateCmd
 from dataorientedai.core.commands.EmptyCmd import EmptyCmd
-from dataorientedai.core.commands.HardStopCmd import HardStopCmd
+from dataorientedai.core.commands.HardStopCmd import HardStopCmd, HardStoppableAdapter
 from dataorientedai.core.commands.LogPrintCmd import LogPrintCmd
 from dataorientedai.core.commands.RepeateCmd import RepeateCmd
 from dataorientedai.core.ContextDictionary import ContextDictionary
@@ -76,105 +76,46 @@ from dataorientedai.core.UObject import UObject
 #     cmd = PredictCmd(PredictableAdapter(obj))
 #     cmd.execute()
 
-
-# # %% Second Iteration
-# if __name__ == "__main__":
-#     queue = Queue()
-#     handler = ExceptionHandler()
-#     handler.setup(
-#         UnzipCmd,
-#         BaseAppException,
-#         lambda cmd, exc: queue.put(LogPrintCmd(cmd, exc)),
-#     )
-#     handler.setup(
-#         MnistUbyteToNumpyConvertCmd,
-#         BaseAppException,
-#         lambda cmd, exc: queue.put(LogPrintCmd(cmd, exc)),
-#     )
-#     handler.setup(
-#         MnistNumpyToImageConvertCmd,
-#         BaseAppException,
-#         lambda cmd, exc: queue.put(LogPrintCmd(cmd, exc)),
-#     )
-#     handler.setup(
-#         TrainCmd,
-#         BaseAppException,
-#         lambda cmd, exc: queue.put(LogPrintCmd(cmd, exc)),
-#     )
-#     handler.setup(
-#         PredictCmd,
-#         BaseAppException,
-#         lambda cmd, exc: queue.put(LogPrintCmd(cmd, exc)),
-#     )
-#     handler.setup(
-#         RepeateCmd,
-#         BaseAppException,
-#         lambda cmd, exc: queue.put(LogPrintCmd(cmd, exc)),
-#     )
-
-#     obj = UObject()
-#     queue.put(InitUnzippableObjectCmd(obj))
-#     queue.put(UnzipCmd(UnzippableAdapter(obj)))
-
-#     obj = UObject()
-#     queue.put(InitMnistUbyteToNumpyConvertableObjectCmd(obj))
-#     queue.put(MnistUbyteToNumpyConvertCmd(MnistUbyteToNumpyConvertableAdapter(obj)))
-
-#     obj = UObject()
-#     queue.put(InitMnistNumpyToImageConvertableObjectCmd(obj))
-#     queue.put(MnistNumpyToImageConvertCmd(MnistNumpyToImageConvertableAdapter(obj)))
-
-#     obj = UObject()
-#     queue.put(InitTrainableObjectCmd(obj))
-#     queue.put(TrainCmd(TrainableAdapter(obj)))
-
-#     obj = UObject()
-#     queue.put(InitPredictableObjectCmd(obj))
-#     queue.put(PredictCmd(PredictableAdapter(obj)))
-
-#     while True and not queue.empty():
-#         cmd = queue.get()
-#         try:
-#             cmd.execute()
-#         except Exception as e:
-#             exc = type(e)
-#             handler.handle(cmd, exc)
-#             # IoC.resolve("ExceptionHandler", cmd, exc).execute()
-
-
 # %% Third Iteration
 if __name__ == "__main__":
     InitScopeBasedIoCImplementationCmd().execute()
-    scope = IoC.resolve("scopes.new", IoC.resolve("scopes.root"))
-    IoC.resolve("scopes.current.set", scope).execute()
 
-    processor_context = Dictionary()
-    InitProcessorContextCmd(processor_context).execute()
-    queue = processor_context["queue"]
+    def func():
+        print(f"root scope: {id(IoC.resolve('Scopes.root'))}")
 
-    obj = UObject()
-    queue.put(InitUnzippableObjectCmd(obj))
-    queue.put(UnzipCmd(UnzippableAdapter(obj)))
+        processor_context = Dictionary()
+        InitProcessorContextCmd(processor_context).execute()
+        processor = Processor(Processable(processor_context))
 
-    obj = UObject()
-    queue.put(InitMnistUbyteToNumpyConvertableObjectCmd(obj))
-    queue.put(MnistUbyteToNumpyConvertCmd(MnistUbyteToNumpyConvertableAdapter(obj)))
+        scope = IoC.resolve("Scopes.new", IoC.resolve("Scopes.root"))
+        IoC.resolve("Scopes.current.set", scope).execute()
+        print(f"current scope: {id(IoC.resolve('Scopes.current'))}")
+        # processor.wait()
 
-    obj = UObject()
-    queue.put(InitMnistNumpyToImageConvertableObjectCmd(obj))
-    queue.put(MnistNumpyToImageConvertCmd(MnistNumpyToImageConvertableAdapter(obj)))
+        obj1 = UObject()
+        obj2 = UObject()
+        obj3 = UObject()
+        obj4 = UObject()
+        obj5 = UObject()
+        queue = processor_context["queue"]
+        queue.put(InitUnzippableObjectCmd(obj1))
+        queue.put(InitMnistUbyteToNumpyConvertableObjectCmd(obj2))
+        queue.put(InitMnistNumpyToImageConvertableObjectCmd(obj3))
+        queue.put(InitTrainableObjectCmd(obj4))
+        queue.put(InitPredictableObjectCmd(obj5))
+        queue.put(UnzipCmd(UnzippableAdapter(obj1)))
+        queue.put(
+            MnistUbyteToNumpyConvertCmd(MnistUbyteToNumpyConvertableAdapter(obj2))
+        )
+        queue.put(
+            MnistNumpyToImageConvertCmd(MnistNumpyToImageConvertableAdapter(obj3))
+        )
+        queue.put(TrainCmd(TrainableAdapter(obj4)))
+        queue.put(PredictCmd(PredictableAdapter(obj5)))
+        # queue.put(HardStopCmd(HardStoppableAdapter(processor_context)))
+        return processor
 
-    obj = UObject()
-    queue.put(InitTrainableObjectCmd(obj))
-    queue.put(TrainCmd(TrainableAdapter(obj)))
-
-    obj = UObject()
-    queue.put(InitPredictableObjectCmd(obj))
-    queue.put(PredictCmd(PredictableAdapter(obj)))
-
-    queue.put(HardStopCmd(processor_context))
-    # action
-    processor = Processor(Processable(processor_context))
-    # processor.wait()
-    # # assert
-    # assert queue.qsize() == 1
+    processor1 = func()
+    processor2 = func()
+    processor1.wait()
+    processor2.wait()

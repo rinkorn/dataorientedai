@@ -62,7 +62,7 @@ class ScopeBasedResolveDependencyStrategy(IStrategy):
     def resolve(key: str, *args: any):
         # if key == "IoC.setup_strategy":
         #     return SetupStrategyCmd(args[0])
-        if key == "scopes.root":
+        if key == "Scopes.root":
             return ScopeBasedResolveDependencyStrategy._root
         else:
             # Не поток устанавливается в scope, а scope устанавливается в потоке.
@@ -77,7 +77,7 @@ class InitSingleThreadScopeCmd(ICommand):
     def execute(self) -> None:
         IoC.resolve(
             "IoC.register",
-            "scopes.storage",
+            "Scopes.storage",
             lambda *args: NotThreadSafeDictionary(),
         ).execute()
 
@@ -138,15 +138,15 @@ class InitScopeBasedIoCImplementationCmd(ICommand):
 
         # scopes.storage - словарик для всех scopes, которые есть в приложении
         dependencies.__setitem__(
-            "scopes.storage",
+            "Scopes.storage",
             lambda *args: ConcurrentDictionary(),
         )
 
         # scopes.new - команда, которая создаёт storage когда это необходимо
         dependencies.__setitem__(
-            "scopes.new",
+            "Scopes.new",
             lambda *args: Scope(
-                IoC.resolve("scopes.storage"),
+                IoC.resolve("Scopes.storage"),
                 args[0],
             ),
         )
@@ -155,13 +155,13 @@ class InitScopeBasedIoCImplementationCmd(ICommand):
         current_scope = ScopeBasedResolveDependencyStrategy._current_scopes["value"]
         default_scope = ScopeBasedResolveDependencyStrategy._default_scope
         dependencies.__setitem__(
-            "scopes.current",
+            "Scopes.current",
             current_scope if current_scope is not None else default_scope,
         )
 
         # scopes.current - устанвоить scope в текущем потоке
         dependencies.__setitem__(
-            "scopes.current.set",
+            "Scopes.current.set",
             lambda *args: _SetScopeInCurrentThreadCmd(args[0]),
         )
 
@@ -177,8 +177,8 @@ class InitScopeBasedIoCImplementationCmd(ICommand):
 
         root_scope = Scope(
             dependencies,
-            LeafScope(IoC.resolve("IoC.default_strategy")),
-            # parent=None,
+            # LeafScope(IoC.resolve("IoC.default_strategy")),
+            parent=None,
         )
 
         ScopeBasedResolveDependencyStrategy._root = root_scope
@@ -192,17 +192,18 @@ class InitScopeBasedIoCImplementationCmd(ICommand):
 
 
 if __name__ == "__main__":
-    InitScopeBasedIoCImplementationCmd().execute()
     # InitSingleThreadScopeCmd().execute()
+    InitScopeBasedIoCImplementationCmd().execute()
 
-    gameID123 = IoC.resolve(
-        "scopes.new",
-        IoC.resolve("scopes.root"),
-    )
+    IoC.resolve("Scopes.current.set", IoC.resolve("Scopes.root"))
     IoC.resolve(
-        "scopes.current.set",
-        gameID123,
-    )
+        "IoC.register",
+        "UObject",
+        lambda *args: UObject(),
+    ).execute()
+
+    scope = IoC.resolve("Scopes.new", IoC.resolve("Scopes.root"))
+    IoC.resolve("Scopes.current.set", scope)
 
     IoC.resolve(
         "IoC.register",
@@ -217,8 +218,24 @@ if __name__ == "__main__":
         "a",
     ).execute()
 
+    from dataorientedai.core.commands.BridgeCmd import BridgeCmd
+    from dataorientedai.core.commands.EmptyCmd import EmptyCmd
+    from dataorientedai.core.commands.LogPrintCmd import LogPrintCmd
+    from dataorientedai.core.commands.MacroCmd import MacroCmd
+
+    IoC.resolve(
+        "Scopes.current.set",
+        IoC.resolve("Scopes.root"),
+    ).execute()
     IoC.resolve(
         "IoC.register",
-        "UObject",
-        lambda *args: UObject(),
+        "BridgeCmd",
+        lambda *args: BridgeCmd(*args),
     ).execute()
+    IoC.resolve(
+        "Scopes.current.set",
+        scope,
+    ).execute()
+    cmd = IoC.resolve("BridgeCmd", MacroCmd(*[...]))
+    cmd.inject(LogPrintCmd(EmptyCmd, ValueError))
+    cmd.execute()

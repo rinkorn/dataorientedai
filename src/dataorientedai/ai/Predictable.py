@@ -106,20 +106,9 @@ class PredictCmd(ICommand):
             image_out = image_out.cpu().detach().numpy()
             # image_out = (image_out * std + mean) * 255
             image_out = image_out.astype("uint8")
-            plt.imshow(image_out, cmap="jet", vmin=0, vmax=10)
-            plt.colorbar()
-            plt.show()
-            # image_out = postprocess(output)
-            # plot_sample(image_out)
-            # return image_out
-
-        # image = np.random.randn(28, 28)
-        # image_out = predict(model_in, image)
-        # plot_image(image_out)
-        # plt.imshow(image_out)
-        # plt.colorbar()
-        # plt.show()
-        # plt.imsave(path_img_out, image_out)
+            # plt.imshow(image_out, cmap="jet", vmin=0, vmax=10)
+            # plt.colorbar()
+            # plt.show()
 
 
 class RegisterUObjectCmd(ICommand):
@@ -127,11 +116,11 @@ class RegisterUObjectCmd(ICommand):
         self.registration_name = registration_name
 
     def execute(self) -> None:
-        o = IoC.resolve("UObject")
+        obj = IoC.resolve("UObject")
         IoC.resolve(
             "IoC.register",
             self.registration_name,
-            lambda *args: o,
+            lambda *args: obj,
         ).execute()
 
 
@@ -164,8 +153,8 @@ if __name__ == "__main__":
 
     # init Scope
     IoC.resolve(
-        "scopes.current.set",
-        IoC.resolve("scopes.new", IoC.resolve("scopes.root")),
+        "Scopes.current.set",
+        IoC.resolve("Scopes.new", IoC.resolve("Scopes.root")),
     ).execute()
 
     # registration
@@ -259,5 +248,8 @@ if __name__ == "__main__":
     ).execute()
 
     # just printing
-    scope = IoC.resolve("scopes.current")
-    print(scope.dependencies._store.keys())
+    scope = IoC.resolve("Scopes.current")
+    print(id(scope), scope.dependencies._store.keys())
+
+    scope = IoC.resolve("Scopes.root")
+    print(id(scope), scope.dependencies._store.keys())

@@ -64,7 +64,10 @@ class InitProcessorContextCmd(ICommand):
             cmd = queue.get()
             try:
                 cmd.execute()
-                print(f"Executed: {cmd.__class__.__name__}")
+                print(
+                    f"Thread: {threading.get_native_id()}. "
+                    f"Executed: {cmd.__class__.__name__}"
+                )
             except Exception as e:
                 exc = type(e)
                 try:
