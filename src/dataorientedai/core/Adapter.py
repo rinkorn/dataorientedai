@@ -1,6 +1,7 @@
 import inspect
 
 from dataorientedai.core.interfaces.IAdapter import IAdapter
+from dataorientedai.core.interfaces.IPlugin import IPlugin
 from dataorientedai.core.IoC import IoC
 from dataorientedai.core.UObject import UObject
 
@@ -74,6 +75,15 @@ class Adapter(IAdapter):
         # print(class_definition)
         # exec(class_definition)
         # return locals()[adapter_class_name]
+
+
+class InitAdapterPlugin(IPlugin):
+    def execute(self):
+        IoC.resolve(
+            "IoC.register",
+            "Adapter",
+            lambda *args: Adapter.generate(args[0])(args[1]),
+        ).execute()
 
 
 # # %%

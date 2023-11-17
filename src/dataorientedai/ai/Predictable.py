@@ -11,7 +11,7 @@ from dataorientedai.ai import SimpleCNN
 from dataorientedai.core.Adapter import Adapter
 from dataorientedai.core.interfaces.ICommand import ICommand
 from dataorientedai.core.interfaces.IUObject import IUObject
-from dataorientedai.core.IoC import InitScopeBasedIoCImplementationCmd, IoC
+from dataorientedai.core.IoC import IoC
 from dataorientedai.core.UObject import UObject
 
 
@@ -148,6 +148,8 @@ class InitPredictableObjectCmd(ICommand):
 #     PredictCmd(PredictableAdapter(obj)).execute()
 
 if __name__ == "__main__":
+    from dataorientedai.core.IoC import InitScopeBasedIoCImplementationCmd
+
     # init IoC
     InitScopeBasedIoCImplementationCmd().execute()
 

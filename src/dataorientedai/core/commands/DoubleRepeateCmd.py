@@ -1,4 +1,6 @@
 from dataorientedai.core.interfaces.ICommand import ICommand
+from dataorientedai.core.interfaces.IPlugin import IPlugin
+from dataorientedai.core.IoC import IoC
 
 
 class DoubleRepeateCmd(ICommand):
@@ -7,3 +9,12 @@ class DoubleRepeateCmd(ICommand):
 
     def execute(self):
         self.cmd.execute()
+
+
+class InitDoubleRepeateCmdPlugin(IPlugin):
+    def execute(self):
+        IoC.resolve(
+            "IoC.register",
+            "Commands.DoubleRepeateCmd",
+            lambda *args: DoubleRepeateCmd(*args),
+        ).execute()

@@ -7,6 +7,7 @@ from dataorientedai.core.ConcurrentDictionary import (
 from dataorientedai.core.interfaces.ICommand import ICommand
 from dataorientedai.core.interfaces.IDictionary import IDictionary
 from dataorientedai.core.interfaces.IIoC import IIoC
+from dataorientedai.core.interfaces.IPlugin import IPlugin
 from dataorientedai.core.interfaces.IScope import IScope
 from dataorientedai.core.interfaces.IStrategy import IStrategy
 from dataorientedai.core.LeafScope import LeafScope
@@ -129,7 +130,7 @@ class _SetScopeInCurrentThreadCmd(ICommand):
         )
 
 
-class InitScopeBasedIoCImplementationCmd(ICommand):
+class InitScopeBasedIoCImplementationPlugin(IPlugin):
     def execute(self):
         if ScopeBasedResolveDependencyStrategy._root is not None:
             return
@@ -191,9 +192,10 @@ class InitScopeBasedIoCImplementationCmd(ICommand):
         _SetScopeInCurrentThreadCmd(root_scope).execute()
 
 
+# %%
 if __name__ == "__main__":
     # InitSingleThreadScopeCmd().execute()
-    InitScopeBasedIoCImplementationCmd().execute()
+    InitScopeBasedIoCImplementationPlugin().execute()
 
     IoC.resolve("Scopes.current.set", IoC.resolve("Scopes.root"))
     IoC.resolve(
@@ -239,3 +241,29 @@ if __name__ == "__main__":
     cmd = IoC.resolve("BridgeCmd", MacroCmd(*[...]))
     cmd.inject(LogPrintCmd(EmptyCmd, ValueError))
     cmd.execute()
+
+# %%
+if __name__ == "__main__":
+    scope = IoC.resolve("scopes.new", IoC.resolve("scopes.root"))
+    IoC.resolve("scopes.current.set", scope).execute()
+    print(id(IoC.resolve("scopes.root")))
+    print(id(scope))
+    print(id(IoC.resolve("scopes.current")))
+    IoC.resolve(
+        "IoC.register",
+        "dependency",
+        lambda *args: 1,
+    ).execute()
+    IoC.resolve("dependency") == 1
+
+    scope = IoC.resolve("scopes.new", IoC.resolve("scopes.root"))
+    IoC.resolve("scopes.current.set", scope).execute()
+    print(id(IoC.resolve("scopes.root")))
+    print(id(scope))
+    print(id(IoC.resolve("scopes.current")))
+    IoC.resolve(
+        "IoC.register",
+        "dependency",
+        lambda *args: 1,
+    ).execute()
+    IoC.resolve("dependency") == 1

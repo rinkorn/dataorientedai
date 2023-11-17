@@ -1,4 +1,5 @@
 from dataorientedai.core.interfaces.ICommand import ICommand
+from dataorientedai.core.interfaces.IPlugin import IPlugin
 from dataorientedai.core.IoC import IoC
 
 
@@ -13,11 +14,11 @@ class BridgeCmd(ICommand):
         self.cmd.execute()
 
 
-class InitBridgeCmdCmd(ICommand):
+class InitBridgeCmdPlugin(IPlugin):
     def execute(self):
         IoC.resolve(
             "IoC.register",
-            "BridgeCmd",
+            "Commands.BridgeCmd",
             lambda *args: BridgeCmd(*args),
         ).execute()
 
@@ -31,7 +32,12 @@ if __name__ == "__main__":
     InitScopeBasedIoCImplementationCmd().execute()
     base_scope = IoC.resolve("Scopes.new", IoC.resolve("Scopes.root"))
     IoC.resolve("Scopes.current.set", base_scope).execute()
-    InitBridgeCmdCmd().execute()
+
+    IoC.resolve(
+        "IoC.register",
+        "BridgeCmd",
+        lambda *args: BridgeCmd(*args),
+    ).execute()
 
     # cmd = BridgeCmd(MacroCmd(*[...]))
     # cmd.inject(LogPrintCmd(EmptyCmd, ValueError))

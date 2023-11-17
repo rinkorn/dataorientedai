@@ -28,9 +28,16 @@ from dataorientedai.ai.Trainable import (
 )
 from dataorientedai.core.commands.DoubleRepeateCmd import DoubleRepeateCmd
 from dataorientedai.core.commands.EmptyCmd import EmptyCmd
-from dataorientedai.core.commands.HardStopCmd import HardStopCmd, HardStoppableAdapter
+from dataorientedai.core.commands.HardStopCmd import (
+    HardStopCmd,
+    HardStoppableAdapter,
+)
 from dataorientedai.core.commands.LogPrintCmd import LogPrintCmd
 from dataorientedai.core.commands.RepeateCmd import RepeateCmd
+from dataorientedai.core.commands.SearchPluginsCmd import (
+    SearchablePluginsAdapter,
+    SearchPluginsCmd,
+)
 from dataorientedai.core.ContextDictionary import ContextDictionary
 from dataorientedai.core.Dictionary import Dictionary
 from dataorientedai.core.exceptions.BaseAppException import BaseAppException
@@ -43,41 +50,58 @@ from dataorientedai.core.Processor import (
 )
 from dataorientedai.core.UObject import UObject
 
-# # %% First iteration
-# if __name__ == "__main__":
-#     obj = UObject()
-#     cmd = InitUnzippableObjectCmd(obj)
-#     cmd.execute()
-#     cmd = UnzipCmd(UnzippableAdapter(obj))
-#     cmd.execute()
 
-#     obj = UObject()
-#     cmd = InitMnistUbyteToNumpyConvertableObjecCmdt(obj)
-#     cmd.execute()
-#     convertable_obj = MnistUbyteToNumpyConvertableAdapter(obj)
-#     cmd = MnistUbyteToNumpyConvertCmd(convertable_obj)
-#     cmd.execute()
+def main():
+    from dataorientedai.core.IoC import InitScopeBasedIoCImplementationPlugin
+    from dataorientedai.core.UObject import UObject
 
-#     obj = UObject()
-#     cmd = InitMnistNumpyToImageConvertableObjectCmd(obj)
-#     cmd.execute()
-#     cmd = MnistNumpyToImageConvertCmd(MnistNumpyToImageConvertableAdapter(obj))
-#     cmd.execute()
+    obj = UObject()
+    obj["path"] = Path(
+        "/home/rinkorn/space/prog/python/free/project-dataorientedai/src/dataorientedai/"
+    )
+    obj["plugins"] = dict()
+    obj["plugins"][
+        "InitScopeBasedIoCImplementationPlugin"
+    ] = InitScopeBasedIoCImplementationPlugin
+    SearchPluginsCmd(SearchablePluginsAdapter(obj)).execute()
 
-#     obj = UObject()
-#     cmd = InitTrainableObjectCmd(obj)
-#     cmd.execute()
-#     cmd = TrainCmd(TrainableAdapter(obj))
-#     cmd.execute()
 
-#     obj = UObject()
-#     cmd = InitPredictableObjectCmd(obj)
-#     cmd.execute()
-#     cmd = PredictCmd(PredictableAdapter(obj))
-#     cmd.execute()
-
-# %% Third Iteration
 if __name__ == "__main__":
+    # # %% First iteration
+    # if __name__ == "__main__":
+    #     obj = UObject()
+    #     cmd = InitUnzippableObjectCmd(obj)
+    #     cmd.execute()
+    #     cmd = UnzipCmd(UnzippableAdapter(obj))
+    #     cmd.execute()
+
+    #     obj = UObject()
+    #     cmd = InitMnistUbyteToNumpyConvertableObjecCmdt(obj)
+    #     cmd.execute()
+    #     convertable_obj = MnistUbyteToNumpyConvertableAdapter(obj)
+    #     cmd = MnistUbyteToNumpyConvertCmd(convertable_obj)
+    #     cmd.execute()
+
+    #     obj = UObject()
+    #     cmd = InitMnistNumpyToImageConvertableObjectCmd(obj)
+    #     cmd.execute()
+    #     cmd = MnistNumpyToImageConvertCmd(MnistNumpyToImageConvertableAdapter(obj))
+    #     cmd.execute()
+
+    #     obj = UObject()
+    #     cmd = InitTrainableObjectCmd(obj)
+    #     cmd.execute()
+    #     cmd = TrainCmd(TrainableAdapter(obj))
+    #     cmd.execute()
+
+    #     obj = UObject()
+    #     cmd = InitPredictableObjectCmd(obj)
+    #     cmd.execute()
+    #     cmd = PredictCmd(PredictableAdapter(obj))
+    #     cmd.execute()
+
+    # %% Third Iteration
+
     InitScopeBasedIoCImplementationCmd().execute()
 
     def func():

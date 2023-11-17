@@ -18,10 +18,9 @@ from dataorientedai.core.BlockingCollection import BlockingCollection
 from dataorientedai.core.interfaces.ICommand import ICommand
 from dataorientedai.core.interfaces.IDictionary import IDictionary
 from dataorientedai.core.interfaces.IUObject import IUObject
-from dataorientedai.core.IoC import InitScopeBasedIoCImplementationCmd, IoC
+from dataorientedai.core.IoC import IoC
 from dataorientedai.core.UObject import UObject
 
-# %%
 # %%
 # class FullModelSaveCmd(ICommand):
 #     def __init__(self, o: IFullModelSavableAdapter):
@@ -313,6 +312,8 @@ class RegisterTrainableObjectCmd(ICommand):
 #     TrainCmd(TrainableAdapter(obj)).execute()
 
 if __name__ == "__main__":
+    from dataorientedai.core.IoC import InitScopeBasedIoCImplementationCmd
+
     InitScopeBasedIoCImplementationCmd().execute()
     scope = IoC.resolve("scopes.new", IoC.resolve("scopes.root"))
     IoC.resolve(

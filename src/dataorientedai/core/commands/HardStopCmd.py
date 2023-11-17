@@ -1,7 +1,9 @@
 import abc
 
 from dataorientedai.core.interfaces.ICommand import ICommand
+from dataorientedai.core.interfaces.IPlugin import IPlugin
 from dataorientedai.core.interfaces.IUObject import IUObject
+from dataorientedai.core.IoC import IoC
 
 
 class IHardStoppable(abc.ABC):
@@ -24,6 +26,25 @@ class HardStopCmd(ICommand):
 
     def execute(self):
         self.o.set_can_continue(False)
+
+
+class InitIHardStoppablePlugin(IPlugin):
+    def execute(self):
+        IoC.resolve(
+            "IoC.register",
+            "Interfaces.IHardStoppable",
+            lambda *args: IHardStoppable(*args),
+        ).execute()
+        IoC.resolve(
+            "IoC.register",
+            "Adapters.HardStoppableAdapter",
+            lambda *args: HardStoppableAdapter(*args),
+        ).execute()
+        IoC.resolve(
+            "IoC.register",
+            "Commands.HardStopCmd",
+            lambda *args: HardStopCmd(*args),
+        ).execute()
 
 
 if __name__ == "__main__":
